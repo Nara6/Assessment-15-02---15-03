@@ -43,4 +43,6 @@ You have to deploy it using a cloud formation template.
 - Users can access the endpoint of NLB to access the website MediaWiki
 
 ## Infrastructure
-![Alt text](Infra-Cloudformation 1.png?raw=true "Infra-Cloudformation 1")
+<p align="center">
+<img src="./Infra-Cloudformation 2.png" width="660"/>
+</p>
