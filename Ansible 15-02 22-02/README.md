@@ -13,6 +13,6 @@ You have to use docker for the client machines and an ansible script to do this.
 - From the Master, the machine installs the Nginx service to all the client machines
     - Install Nginx Service
     - Enable Nginx Service
-Output
+## Output
 - Ensure that the Nginx service is installed
 - Ensure that the Nginx service is enabled
