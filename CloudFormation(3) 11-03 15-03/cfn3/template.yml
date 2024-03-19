@@ -20,10 +20,12 @@ Parameters:
     Description: A Public Subnet tag name
     Type: String
     Default: Pub-Subnet-01
+  
   PublicSubnet2Tag:
     Description: A Public Subnet tag name
     Type: String
     Default: Pub-Subnet-02
+  
   PublicSubnet3Tag:
     Description: A Public Subnet tag name
     Type: String
@@ -33,10 +35,12 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
     Default: 10.0.21.0/24
+  
   PublicAppSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
     Default: 10.0.22.0/24
+  
   PublicAppSubnet3CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
@@ -46,78 +50,97 @@ Parameters:
     Description: A App Private Subnet tag name
     Type: String
     Default: app-subnet-01
+  
   AppSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
     Default: 10.0.24.0/24
+  
   AppSubnetTag2:
     Description: A App Private Subnet tag name
     Type: String
     Default: app-subnet-02
+  
   AppSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.25.0/24
+  
   AppSubnetTag3:
     Description: A App Private Subnet tag name
     Type: String
     Default: app-subnet-03
+  
   AppSubnet3CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.26.0/24
+  
   PrivateSubnetTag1:
     Description: A App Private Subnet tag name
     Type: String
     Default: private-subnet-01
+  
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
     Default: 10.0.27.0/24
+  
   PrivateSubnetTag2:
     Description: A App Private Subnet tag name
     Type: String
     Default: private-subnet-02
+  
   PrivateSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.28.0/24
+  
   PrivateSubnetTag3:
     Description: A App Private Subnet tag name
     Type: String
     Default: private-subnet-03
+  
   PrivateSubnet3CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.29.0/24
+  
   SecurityGroup:
     Description: An security group for a specific user to allow access 
     Type: String
     Default: 96.9.66.148/32
+  
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
     Default: App-Demo
+  
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the instance"
+  
   AMIId:
     Type: String
     Description: "List of AMI IDs for different regions"
     Default: ami-09eb4311cbaecf89d
+  
   DBUsername:
     Type: "String"
     Default: admin
     Description: Username for Aurora MySQL database access
+  
   DBPassword:
     Type: "String" 
     NoEcho: true
     Description: Password for Aurora MySQL database access
     Default: Passw0rd
+  
   DBName:
     Type: String
     Description: The name of the database to create
     Default: my_wiki
+  
   ECSAMI:
     Description: The Amazon Machine Image ID used for the cluster
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -132,17 +155,20 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref VPCTagName
+  
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} - Igw
+  
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref VPC
+  
   PublicAppSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -152,6 +178,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PublicSubnet1Tag
+  
   PublicAppSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -161,6 +188,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PublicSubnet2Tag
+  
   PublicAppSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
@@ -170,6 +198,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PublicSubnet3Tag
+  
   AppSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -179,6 +208,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref AppSubnetTag1
+  
   AppSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -188,6 +218,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref AppSubnetTag2
+  
   AppSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
@@ -197,6 +228,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref AppSubnetTag3
+  
   PrivateAppSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -207,6 +239,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PrivateSubnetTag1
+  
   PrivateAppSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -217,6 +250,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PrivateSubnetTag2
+  
   PrivateAppSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
@@ -227,11 +261,13 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PrivateSubnetTag3
+  
   NatGateway1EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
+  
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -240,6 +276,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} - Nat Gateway
+  
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -247,6 +284,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Routes
+  
   DefaultPublicRoute:
     Type: AWS::EC2::Route
     DependsOn: InternetGatewayAttachment
@@ -254,21 +292,25 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
+  
   PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicAppSubnet1
+  
   PublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicAppSubnet2
+  
   PublicSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicAppSubnet3
+  
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -276,27 +318,32 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Routes
+  
   DefaultPrivateRoute:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway1
+  
   PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref AppSubnet1
+  
   PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref AppSubnet2
+  
   PrivateSubnet3RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref AppSubnet3
+  
   NLBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -307,6 +354,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: !Ref SecurityGroup
+  
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -317,6 +365,7 @@ Resources:
           FromPort: 32768
           ToPort: 61000
           SourceSecurityGroupId: !Ref NLBSecurityGroup
+  
   NetworkLoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
@@ -329,10 +378,12 @@ Resources:
         - !Ref PublicAppSubnet2
         - !Ref PublicAppSubnet3
       Type: network
+  
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: DemoECS
+  
   ECSAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: ECSCluster
@@ -349,6 +400,7 @@ Resources:
       MinSize: 2
       MaxSize: 6
       DesiredCapacity: 2
+  
   ECSLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     DependsOn:  ECSCluster
@@ -370,6 +422,7 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+  
   CapacityProvider:
     Type: AWS::ECS::CapacityProvider
     Properties:
@@ -393,6 +446,7 @@ Resources:
       - Base: 0
         CapacityProvider: !Ref CapacityProvider
         Weight: 1
+  
   Taskdefinition: 
     Type: AWS::ECS::TaskDefinition
     Properties: 
@@ -420,11 +474,13 @@ Resources:
         OperatingSystemFamily: LINUX
       RequiresCompatibilities: 
         - EC2
+  
   CloudWatchLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Ref AWS::StackName
       RetentionInDays: 365
+  
   Service:
     Type: AWS::ECS::Service
     DependsOn: Listener
@@ -439,6 +495,7 @@ Resources:
           ContainerPort: 80
           TargetGroupArn: !Ref TargetGroup
           LoadBalancerName: !Ref AWS::NoValue
+  
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -448,6 +505,7 @@ Resources:
       HealthCheckEnabled: true
       TargetType: "instance"
       HealthCheckProtocol: "TCP"
+  
   Listener:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
@@ -457,57 +515,61 @@ Resources:
       DefaultActions:
         - Type: "forward"
           TargetGroupArn: !Ref TargetGroup
-  # DBSubnetGroup: 
-  #   Type: "AWS::RDS::DBSubnetGroup"
-  #   Properties: 
-  #     DBSubnetGroupDescription: This is for Demo Subnet Group with Aurora Cluster
-  #     SubnetIds: 
-  #       - !Ref PrivateAppSubnet1
-  #       - !Ref PrivateAppSubnet2
-  #       - !Ref PrivateAppSubnet3
-  #     Tags: 
-  #       - 
-  #         Key: name
-  #         Value: demo-rds-group
-  # DBSecurityGroupCluster:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: Allow connections from specified CIDR ranges
-  #     VpcId: !Ref VPC
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 3306
-  #         ToPort: 3306
-  #         CidrIp: !Ref AppSubnet1CIDR
   
-  # DBCluster:
-  #   Type: AWS::RDS::DBCluster
-  #   Properties:
-  #     Engine: aurora-mysql
-  #     DatabaseName: !Ref DBName
-  #     MasterUsername: !Ref DBUsername
-  #     DBSubnetGroupName: !Ref DBSubnetGroup
-  #     VpcSecurityGroupIds: 
-  #       - !Ref DBSecurityGroupCluster
-  #     MasterUserPassword: !Ref DBPassword
-  #     DeletionProtection: false
-  #     DBClusterParameterGroupName: !Ref DBClusterParameterGroup
-  # RDSDBInstance1:
-  #   Type: 'AWS::RDS::DBInstance'
-  #   Properties:
-  #     Engine: aurora-mysql
-  #     DBClusterIdentifier:
-  #       Ref: DBCluster
-  #     PubliclyAccessible: 'false'
-  #     DBInstanceClass: 'db.t3.medium'
-  # DBClusterParameterGroup:
-    # Type: AWS::RDS::DBClusterParameterGroup
-    # Properties:
-    #   Description: "Parameter group for Aurora cluster"
-    #   Family: aurora-mysql8.0
-    #   Parameters:
-    #     time_zone: "UTC"
-# Outputs:
-#   NLBURL:
-#     Description: "URL of the Network Load Balancer"
-#     Value: !GetAtt [NetworkLoadBalancer, DNSName]
+  DBSubnetGroup: 
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties: 
+      DBSubnetGroupDescription: This is for Demo Subnet Group with Aurora Cluster
+      SubnetIds: 
+        - !Ref PrivateAppSubnet1
+        - !Ref PrivateAppSubnet2
+        - !Ref PrivateAppSubnet3
+      Tags: 
+        - 
+          Key: name
+          Value: demo-rds-group
+  
+  DBSecurityGroupCluster:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow connections from specified CIDR ranges
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref InstanceSecurityGroup
+  
+  DBCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-mysql
+      DatabaseName: !Ref DBName
+      MasterUsername: !Ref DBUsername
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VpcSecurityGroupIds: 
+        - !Ref DBSecurityGroupCluster
+      MasterUserPassword: !Ref DBPassword
+      DeletionProtection: false
+      DBClusterParameterGroupName: !Ref DBClusterParameterGroup
+  
+  RDSDBInstance1:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      Engine: aurora-mysql
+      DBClusterIdentifier:
+        Ref: DBCluster
+      PubliclyAccessible: 'false'
+      DBInstanceClass: 'db.t3.medium'
+  
+  DBClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: "Parameter group for Aurora cluster"
+      Family: aurora-mysql8.0
+      Parameters:
+        time_zone: "UTC"
+Outputs:
+  NLBURL:
+    Description: "URL of the Network Load Balancer"
+    Value: !GetAtt [NetworkLoadBalancer, DNSName]
