@@ -1,0 +1,16 @@
+---
+# tasks file for three_container
+- name: Build Iamge and Start the client Container
+  community.docker.docker_compose_v2:
+    project_src: "{{ playbook_dir }}/three_container/files"
+    files: docker-compose.yml
+    state: present
+    build: always
+  register: output
+# - name: Show results
+#   ansible.builtin.debug:
+#     var: output.containers
+#   when: output.failed == false
+
+- name: Refresh Inventory 
+  meta: refresh_inventory

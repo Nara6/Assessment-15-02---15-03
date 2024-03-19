@@ -1,0 +1,10 @@
+# ---
+- hosts: local
+  roles:
+    - role: three_container
+
+
+- hosts: network_files_my_network
+  roles:
+    - role: nginx_installation
+      # tags: nginx 

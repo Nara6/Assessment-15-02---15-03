@@ -1,0 +1,295 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template is used to set up the infra for Cloud Formation Assessment 1
+
+Parameters:
+  VPCTagName:
+    Description: A VPC tag name
+    Type: String
+    Default: demo-vpc
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.0.0.0/16
+    MinLength: '9'
+    MaxLength: '18'
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  PublicSubnetTag:
+    Description: A Public Subnet tag name
+    Type: String
+    Default: Pub-Subnet-01
+
+  PublicAppSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.1.0/24
+
+  AppSubnetTag1:
+    Description: A App Private Subnet tag name
+    Type: String
+    Default: app-subnet-01
+  PrivateAppSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.24.0/24
+  AppSubnetTag2:
+    Description: A App Private Subnet tag name
+    Type: String
+    Default: app-subnet-02
+  PrivateAppSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.0.25.0/24
+  AppSubnetTag3:
+    Description: A App Private Subnet tag name
+    Type: String
+    Default: app-subnet-03
+  PrivateAppSubnet3CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.0.26.0/24
+  SecurityGroup:
+    Description: An security group for a specific user to allow access 
+    Type: String
+    Default: 96.9.66.148/32
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+    Default: App-Demo
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: "Name of an existing EC2 KeyPair to enable SSH access to the instance"
+  AMIId:
+    Type: String
+    Description: "List of AMI IDs for different regions"
+    Default: ami-09eb4311cbaecf89d
+  
+Resources: 
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref VPCTagName
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} - Igw
+  
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+    
+  PublicAppSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicAppSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Ref PublicSubnetTag
+  PrivateAppSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PrivateAppSubnet1CIDR
+      Tags:
+        - Key: Name
+          Value: !Ref AppSubnetTag1
+  PrivateAppSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: !Ref PrivateAppSubnet2CIDR
+      Tags:
+        - Key: Name
+          Value: !Ref AppSubnetTag2
+  PrivateAppSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: !Ref PrivateAppSubnet3CIDR
+      Tags:
+        - Key: Name
+          Value: !Ref AppSubnetTag3
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicAppSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} - Nat Gateway
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Routes
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicAppSubnet1
+  
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Private Routes
+
+  DefaultPrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref PrivateAppSubnet1
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow connections from specified CIDR ranges
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref SecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref PublicAppSubnet1CIDR
+  PrivateInstance:
+    DependsOn: 
+      - 
+        DefaultPrivateRoute
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceTypeParameter
+      KeyName: !Ref KeyName
+      ImageId: !Ref AMIId
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "false"
+          DeviceIndex: "0"
+          SubnetId: !Ref PrivateAppSubnet1
+          GroupSet:
+            - !Ref InstanceSecurityGroup
+      Tags:
+        - Key: Name
+          Value: "PrivateInstanceDemo"
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          apt update
+          apt install -y docker.io docker-compose
+          systemctl start docker
+          systemctl enable docker
+          echo "
+          version: '3'
+          services:
+            mediawiki:
+              image: mediawiki
+              restart: always
+              ports:
+                - 80:80
+              links:
+                - database
+              volumes:
+                - ./images:/var/www/html/images
+            database:
+              image: mysql:8
+              restart: always
+              environment:
+                MYSQL_DATABASE: my_wiki
+                MYSQL_USER: wikiuser
+                MYSQL_PASSWORD: example
+                MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+              volumes:
+                - ./db:/var/lib/mysql
+          volumes:
+            images:
+            db:
+          " > docker-compose.yml
+          docker-compose up -d
+  NetworkLoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: "demo-nlb"
+      Scheme: "internet-facing"
+      SecurityGroups: 
+        - !Ref InstanceSecurityGroup
+      Subnets:
+        - !Ref PublicAppSubnet1
+      Type: network
+
+  TargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: "demo-tg"
+      Port: 80
+      Protocol: "TCP"
+      VpcId: !Ref VPC
+      HealthCheckEnabled: "true"
+      TargetType: "instance"
+      Targets:
+        - Id: !Ref PrivateInstance
+          Port: 80
+  Listener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      LoadBalancerArn: !Ref NetworkLoadBalancer
+      Port: 80
+      Protocol: "TCP"
+      DefaultActions:
+        - Type: "forward"
+          TargetGroupArn: !Ref TargetGroup
+Outputs:
+  NLBURL:
+    Description: "URL of the Network Load Balancer"
+    Value: !GetAtt [NetworkLoadBalancer, DNSName]

@@ -1,0 +1,29 @@
+FROM centos:7
+
+RUN yum install -y python3 openssh-server
+
+ENV container docker
+
+# Clean up systemd
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+
+# Expose ports
+EXPOSE 22 80
+
+# Create SSH directory and set permissions
+RUN mkdir -p /root/.ssh && \
+    chmod 0700 /root/.ssh
+
+# Copy public key for SSH access
+COPY id_rsa.pub /root/.ssh/authorized_keys
+
+# Start SSH service
+CMD ["/usr/sbin/init"]

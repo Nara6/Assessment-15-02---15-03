@@ -1,0 +1,44 @@
+version: "3"
+services:
+  ubuntu:
+    container_name: ubuntu
+    build: 
+      context: ./
+      dockerfile: Dockerfile-ubuntu
+    privileged: true
+    tty: true
+    networks: 
+      - my_network
+    ports:
+      - 8082:80
+      - 1001:22
+    hostname: ubuntu_client
+  debian:
+    container_name: debian
+    build: 
+      context: ./
+      dockerfile: Dockerfile-debian
+    privileged: true
+    tty: true
+    networks: 
+      - my_network
+    ports:
+      - 8083:80
+      - 1002:22
+    hostname: debian_client
+  centos: 
+    container_name: centos
+    build: 
+      context: ./
+      dockerfile: Dockerfile-centos7
+    privileged: true
+    tty: true
+    networks: 
+      - my_network
+    ports:
+      - 8080:80
+      - 1003:22
+    hostname: centos_client
+    
+networks:
+  my_network:
