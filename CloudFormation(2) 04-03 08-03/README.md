@@ -1,4 +1,4 @@
-# Assessment CloudFormation 1
+# Assessment CloudFormation 2
 ## Purpose
 <b>MediaWiki</b> is a free and open-source wiki engine where you can host an online documentation application.
 It helps you collect and organize knowledge and make it available to people.
