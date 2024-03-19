@@ -216,15 +216,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: !Ref SecurityGroup
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: !Ref PublicAppSubnet1CIDR
+          SourceSecurityGroupId: !Ref NLBSecurityGroup
   
   PrivateInstance:
     DependsOn: 
@@ -279,13 +271,24 @@ Resources:
           " > docker-compose.yml
           docker-compose up -d
   
+  NLBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow connections from specified CIDR ranges
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref SecurityGroup
+  
   NetworkLoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
       Name: "demo-nlb"
       Scheme: "internet-facing"
       SecurityGroups: 
-        - !Ref InstanceSecurityGroup
+        - !Ref NLBSecurityGroup
       Subnets:
         - !Ref PublicAppSubnet1
       Type: network
