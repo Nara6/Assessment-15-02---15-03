@@ -30,34 +30,42 @@ Parameters:
     Description: A App Private Subnet tag name
     Type: String
     Default: app-subnet-01
+  
   PrivateAppSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
     Default: 10.0.24.0/24
+  
   AppSubnetTag2:
     Description: A App Private Subnet tag name
     Type: String
     Default: app-subnet-02
+  
   PrivateAppSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.25.0/24
+  
   AppSubnetTag3:
     Description: A App Private Subnet tag name
     Type: String
     Default: app-subnet-03
+  
   PrivateAppSubnet3CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 10.0.26.0/24
+  
   SecurityGroup:
     Description: An security group for a specific user to allow access 
     Type: String
     Default: 96.9.66.148/32
+  
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
     Default: App-Demo
+  
   InstanceTypeParameter:
     Type: String
     Default: t2.micro
@@ -66,9 +74,11 @@ Parameters:
       - m1.small
       - m1.large
     Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+  
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the instance"
+  
   AMIId:
     Type: String
     Description: "List of AMI IDs for different regions"
@@ -84,6 +94,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref VPCTagName
+  
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -107,6 +118,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref PublicSubnetTag
+  
   PrivateAppSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -116,6 +128,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref AppSubnetTag1
+  
   PrivateAppSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -125,6 +138,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref AppSubnetTag2
+  
   PrivateAppSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
@@ -134,11 +148,13 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref AppSubnetTag3
+  
   NatGateway1EIP:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
+  
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -147,6 +163,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} - Nat Gateway
+  
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -154,6 +171,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Routes
+  
   DefaultPublicRoute:
     Type: AWS::EC2::Route
     DependsOn: InternetGatewayAttachment
@@ -161,6 +179,7 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
+  
   PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -187,6 +206,7 @@ Resources:
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       SubnetId: !Ref PrivateAppSubnet1
+  
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -205,6 +225,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: !Ref PublicAppSubnet1CIDR
+  
   PrivateInstance:
     DependsOn: 
       - 
@@ -257,6 +278,7 @@ Resources:
             db:
           " > docker-compose.yml
           docker-compose up -d
+  
   NetworkLoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
@@ -280,6 +302,7 @@ Resources:
       Targets:
         - Id: !Ref PrivateInstance
           Port: 80
+  
   Listener:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
