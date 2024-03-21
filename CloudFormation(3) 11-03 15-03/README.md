@@ -47,5 +47,5 @@ You have to deploy it using a cloud formation template.
 
 ## Infrastructure
 <p align="center">
-<img src="./Infra-Cloudformation 2.png" width="660"/>
+<img src="./Infra-Cloudformation 3.png" width="660"/>
 </p>

@@ -371,6 +371,10 @@ Resources:
     Properties:
       Name: "demo-nlb"
       Scheme: "internet-facing"
+      LoadBalancerAttributes:
+        - 
+          Key: load_balancing.cross_zone.enabled
+          Value: true
       SecurityGroups: 
         - !Ref NLBSecurityGroup
       Subnets:
@@ -387,8 +391,6 @@ Resources:
   ECSAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: ECSCluster
-    # This is to ensure that the ASG gets deleted first before these
-    # resources, when it comes to stack teardown.
     Properties:
       VPCZoneIdentifier:
         - !Ref AppSubnet1
@@ -397,13 +399,13 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref ECSLaunchTemplate
         Version: !GetAtt ECSLaunchTemplate.LatestVersionNumber
-      MinSize: 2
+      MinSize: 1
       MaxSize: 6
       DesiredCapacity: 2
   
   ECSLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
-    DependsOn:  ECSCluster
+    DependsOn: ECSCluster
     Properties:
       LaunchTemplateData:
         ImageId: !Ref ECSAMI
@@ -435,6 +437,8 @@ Resources:
           Status: ENABLED
           # Percentage of cluster reservation to try to maintain
           TargetCapacity: 100
+        ManagedTerminationProtection: DISABLED
+        ManagedDraining: ENABLED
 
   CapacityProviderAssociation:
     Type: AWS::ECS::ClusterCapacityProviderAssociations
@@ -451,8 +455,6 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties: 
       ExecutionRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole
-      Cpu: 128
-      Memory: 256
       ContainerDefinitions: 
         - 
           Name: "MediaWiki"
@@ -461,6 +463,7 @@ Resources:
             - 
               ContainerPort: "80"
           Essential: true
+          Memory: 128
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -472,8 +475,6 @@ Resources:
       RuntimePlatform:
         CpuArchitecture: ARM64
         OperatingSystemFamily: LINUX
-      RequiresCompatibilities: 
-        - EC2
   
   CloudWatchLogsGroup:
     Type: AWS::Logs::LogGroup
